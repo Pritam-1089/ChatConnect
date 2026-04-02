@@ -29,4 +29,7 @@ public class ConversationsController : ControllerBase
 
     [HttpPost("{id}/read")]
     public async Task<IActionResult> MarkAsRead(int id) { await _chat.MarkAsReadAsync(id, UserId); return NoContent(); }
+
+    [HttpDelete("{convoId}/messages/{msgId}")]
+    public async Task<IActionResult> UnsendMessage(int convoId, int msgId) { await _chat.UnsendMessageAsync(msgId, UserId); return NoContent(); }
 }

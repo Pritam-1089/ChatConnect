@@ -88,5 +88,13 @@ public class ChatService : IChatService
         if (user != null) { user.IsOnline = isOnline; user.LastSeen = DateTime.UtcNow; await _userRepo.UpdateAsync(user); }
     }
 
+    public async Task UnsendMessageAsync(int messageId, int userId)
+    {
+        var msg = await _msgRepo.GetByIdAsync(messageId) ?? throw new KeyNotFoundException("Message not found.");
+        if (msg.SenderId != userId) throw new UnauthorizedAccessException("You can only unsend your own messages.");
+        msg.Content = "This message was deleted";
+        await _msgRepo.UpdateAsync(msg);
+    }
+
     private static UserDto MapUser(User u) => new(u.Id, u.FullName, u.Email, u.AvatarUrl, u.IsOnline, u.LastSeen);
 }

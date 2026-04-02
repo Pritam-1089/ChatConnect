@@ -12,4 +12,5 @@ public interface IChatService
     Task<IEnumerable<UserDto>> SearchUsersAsync(string query, int userId);
     Task<IEnumerable<UserDto>> GetOnlineUsersAsync();
     Task SetUserOnlineAsync(int userId, bool isOnline);
+    Task UnsendMessageAsync(int messageId, int userId);
 }

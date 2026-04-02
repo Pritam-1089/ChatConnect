@@ -27,4 +27,7 @@ public class MessageRepository : IMessageRepository
 
     public async Task<int> GetUnreadCountAsync(int conversationId, int userId) =>
         await _context.Messages.CountAsync(m => m.ConversationId == conversationId && m.SenderId != userId && !m.IsRead);
+
+    public async Task<Message?> GetByIdAsync(int id) => await _context.Messages.FindAsync(id);
+    public async Task UpdateAsync(Message message) { _context.Messages.Update(message); await _context.SaveChangesAsync(); }
 }

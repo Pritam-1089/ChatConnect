@@ -5,7 +5,7 @@ import { ConversationDto, MessageDto, UserDto } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private api = 'https://localhost:7002/api';
+  private api = 'http://10.93.149.246:5276/api';
   constructor(private http: HttpClient) {}
 
   getConversations(): Observable<ConversationDto[]> { return this.http.get<ConversationDto[]>(this.api + '/conversations'); }
@@ -16,4 +16,5 @@ export class ChatService {
   markAsRead(convoId: number): Observable<void> { return this.http.post<void>(this.api + '/conversations/' + convoId + '/read', {}); }
   searchUsers(q: string): Observable<UserDto[]> { return this.http.get<UserDto[]>(this.api + '/users/search?q=' + q); }
   getOnlineUsers(): Observable<UserDto[]> { return this.http.get<UserDto[]>(this.api + '/users/online'); }
+  unsendMessage(convoId: number, msgId: number): Observable<void> { return this.http.delete<void>(this.api + '/conversations/' + convoId + '/messages/' + msgId); }
 }

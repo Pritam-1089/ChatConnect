@@ -11,7 +11,8 @@ import { ConversationDto, MessageDto, UserDto } from '../../models/api.models';
   selector: 'app-chat',
   imports: [FormsModule, DatePipe, SlicePipe],
   templateUrl: './chat.component.html',
-  styleUrl: './chat.component.scss'
+  styleUrl: './chat.component.scss',
+  host: { '(document:click)': 'onDocClick()' }
 })
 export class ChatComponent implements OnInit, OnDestroy {
   conversations: ConversationDto[] = [];
@@ -21,6 +22,18 @@ export class ChatComponent implements OnInit, OnDestroy {
   searchQuery = '';
   searchResults: UserDto[] = [];
   typingUser: string | null = null;
+  showEmojiPicker = false;
+  previewImage: string | null = null;
+  pendingImage: string | null = null;
+  imageCaption = '';
+  toastMessage: string | null = null;
+  msgMenuId: number | null = null;
+  emojis = [
+    '😀','😂','🤣','😍','🥰','😘','😎','🤩','😊','🙂','😉','😋','🤔','🤗','🤭',
+    '😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌',
+    '👍','👎','👏','🙌','🤝','💪','🎉','🎊','❤️','🔥','⭐','💯','✅','❌','⚡',
+    '🚀','💻','📱','🎯','📌','💡','🔑','📝','📂','🛒','💰','🎁','🏆','🌟','👋'
+  ];
   private subs: Subscription[] = [];
   private typingTimeout: any;
 
@@ -100,6 +113,80 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.searchResults = u;
       this.cdr.markForCheck();
     });
+  }
+
+  addEmoji(emoji: string) {
+    this.newMessage += emoji;
+    this.showEmojiPicker = false;
+  }
+
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file || !this.selectedConvo) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.pendingImage = reader.result as string;
+      this.imageCaption = '';
+      this.cdr.markForCheck();
+    };
+    reader.readAsDataURL(file);
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  sendImage() {
+    if (!this.pendingImage || !this.selectedConvo) return;
+    if (this.imageCaption.trim()) {
+      this.signalR.sendMessage(this.selectedConvo.id, this.imageCaption);
+    }
+    this.signalR.sendMessage(this.selectedConvo.id, this.pendingImage);
+    this.pendingImage = null;
+    this.imageCaption = '';
+  }
+
+  onDocClick() { this.msgMenuId = null; }
+
+  onMsgRightClick(event: Event, msg: MessageDto) {
+    event.preventDefault();
+    this.msgMenuId = this.msgMenuId === msg.id ? null : msg.id;
+    this.cdr.markForCheck();
+  }
+
+  copyMessage(msg: MessageDto) {
+    navigator.clipboard.writeText(msg.content);
+    this.msgMenuId = null;
+    this.showToast('Message copied!');
+  }
+
+  unsendMessage(msg: MessageDto) {
+    if (!this.selectedConvo) return;
+    this.chatService.unsendMessage(this.selectedConvo.id, msg.id).subscribe(() => {
+      const idx = this.messages.findIndex(m => m.id === msg.id);
+      if (idx >= 0) {
+        this.messages[idx] = { ...msg, content: 'This message was deleted' };
+        this.messages = [...this.messages];
+      }
+      this.msgMenuId = null;
+      this.showToast('Message unsent');
+      this.cdr.markForCheck();
+    });
+  }
+
+  showToast(msg: string) {
+    this.toastMessage = msg;
+    this.cdr.markForCheck();
+    setTimeout(() => { this.toastMessage = null; this.cdr.markForCheck(); }, 2000);
+  }
+
+  cancelImage() {
+    this.pendingImage = null;
+    this.imageCaption = '';
+  }
+
+  downloadImage(dataUrl: string, msgId: number) {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `ChatConnect-image-${msgId || Date.now()}.png`;
+    link.click();
   }
 
   startChat(userId: number) {

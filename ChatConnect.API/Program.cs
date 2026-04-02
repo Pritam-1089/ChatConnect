@@ -42,11 +42,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(o => { o.MaximumReceiveMessageSize = 5 * 1024 * 1024; });
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
-        policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+        policy.WithOrigins("http://localhost:4200", "http://10.93.149.246:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 });
 
 builder.Services.AddControllers()
@@ -79,7 +79,8 @@ using (var scope = app.Services.CreateScope())
         var mayuri = new User { FullName = "Mayuri Kawar", Email = "mayuri@chat.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"), IsOnline = true };
         var shivani = new User { FullName = "Shivani Patil", Email = "shivani@chat.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456") };
         var rohan = new User { FullName = "Rohan Deshmukh", Email = "rohan@chat.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456") };
-        db.Users.AddRange(pritam, mayuri, shivani, rohan);
+        var aniket = new User { FullName = "Aniket", Email = "aniket@chat.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456") };
+        db.Users.AddRange(pritam, mayuri, shivani, rohan, aniket);
         db.SaveChanges();
 
         var chat1 = new Conversation { IsGroup = false };
@@ -138,7 +139,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.UseHttpsRedirection();
 app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
