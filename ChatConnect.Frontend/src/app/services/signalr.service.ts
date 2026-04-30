@@ -18,7 +18,7 @@ export class SignalRService {
     const token = this.auth.getToken();
     if (!token) return;
     this.hub = new signalR.HubConnectionBuilder()
-      .withUrl('http://10.93.149.246:5276/hubs/chat', { accessTokenFactory: () => token })
+      .withUrl('http://localhost:5276/hubs/chat', { accessTokenFactory: () => token })
       .withAutomaticReconnect().build();
     this.hub.start();
     this.hub.on('ReceiveMessage', (convoId: number, msg: MessageDto) => this.message$.next({ conversationId: convoId, message: msg }));

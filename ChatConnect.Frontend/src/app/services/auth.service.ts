@@ -6,7 +6,7 @@ import { AuthResponse } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://10.93.149.246:5276/api/auth';
+  private apiUrl = 'http://localhost:5276/api/auth';
   private currentUser = signal<AuthResponse | null>(this.getStored());
   user = this.currentUser.asReadonly();
   isLoggedIn = computed(() => !!this.currentUser());
@@ -21,6 +21,12 @@ export class AuthService {
   }
   logout() { localStorage.removeItem('chat_user'); this.currentUser.set(null); this.router.navigate(['/login']); }
   getToken(): string | null { return this.currentUser()?.token ?? null; }
+  updateAvatar(avatarUrl: string | null) {
+    const u = this.currentUser();
+    if (!u) return;
+    const updated: AuthResponse = { ...u, avatarUrl: avatarUrl ?? undefined };
+    this.setUser(updated);
+  }
   private setUser(u: AuthResponse) { localStorage.setItem('chat_user', JSON.stringify(u)); this.currentUser.set(u); }
   private getStored(): AuthResponse | null { const d = localStorage.getItem('chat_user'); return d ? JSON.parse(d) : null; }
 }
