@@ -198,4 +198,30 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.cdr.markForCheck();
     });
   }
+
+  convoAvatar(convo: ConversationDto): string | undefined {
+    if (convo.isGroup) return undefined;
+    const me = this.auth.user()?.userId;
+    return convo.members.find(m => m.id !== me)?.avatarUrl;
+  }
+
+  onAvatarSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { this.showToast('Please pick an image'); return; }
+    if (file.size > 2 * 1024 * 1024) { this.showToast('Image must be under 2 MB'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      this.chatService.updateAvatar(dataUrl).subscribe(res => {
+        this.auth.updateAvatar(res.avatarUrl);
+        const myId = this.auth.user()?.userId;
+        this.conversations.forEach(c => c.members.forEach(m => { if (m.id === myId) m.avatarUrl = res.avatarUrl ?? undefined; }));
+        this.showToast('Profile photo updated');
+        this.cdr.markForCheck();
+      });
+    };
+    reader.readAsDataURL(file);
+  }
 }

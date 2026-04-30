@@ -17,4 +17,11 @@ public class UsersController : ControllerBase
 
     [HttpGet("online")]
     public async Task<ActionResult<IEnumerable<UserDto>>> Online() => Ok(await _chat.GetOnlineUsersAsync());
+
+    [HttpPut("me/avatar")]
+    public async Task<ActionResult<object>> UpdateAvatar([FromBody] UpdateAvatarDto dto)
+    {
+        var url = await _chat.UpdateAvatarAsync(UserId, dto.AvatarUrl);
+        return Ok(new { avatarUrl = url });
+    }
 }

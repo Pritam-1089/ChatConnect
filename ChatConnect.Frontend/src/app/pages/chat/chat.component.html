@@ -2,6 +2,15 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
+      <label class="my-avatar" title="Change profile photo">
+        @if (auth.user()?.avatarUrl) {
+          <img [src]="auth.user()!.avatarUrl!" alt="me" />
+        } @else {
+          <span class="avatar-letter">{{ (auth.user()?.fullName || '?').charAt(0) }}</span>
+        }
+        <span class="my-avatar-edit">✎</span>
+        <input type="file" accept="image/*" hidden (change)="onAvatarSelected($event)" />
+      </label>
       <span class="brand">ChatConnect</span>
       <button class="logout-btn" (click)="auth.logout()">Logout</button>
     </div>
@@ -12,7 +21,11 @@
       <div class="search-results">
         @for (user of searchResults; track user.id) {
           <div class="search-item" (click)="startChat(user.id)">
-            <span class="avatar">{{ user.fullName.charAt(0) }}</span>
+            @if (user.avatarUrl) {
+              <img class="avatar img" [src]="user.avatarUrl" alt="" />
+            } @else {
+              <span class="avatar">{{ user.fullName.charAt(0) }}</span>
+            }
             <span>{{ user.fullName }}</span>
             @if (user.isOnline) { <span class="online-dot"></span> }
           </div>
@@ -22,7 +35,11 @@
     <div class="convo-list">
       @for (convo of conversations; track convo.id) {
         <div class="convo-item" [class.active]="selectedConvo?.id === convo.id" (click)="selectConversation(convo)">
-          <span class="avatar" [class.group]="convo.isGroup">{{ convo.name.charAt(0) }}</span>
+          @if (convoAvatar(convo)) {
+            <img class="avatar img" [src]="convoAvatar(convo)!" alt="" />
+          } @else {
+            <span class="avatar" [class.group]="convo.isGroup">{{ convo.name.charAt(0) }}</span>
+          }
           <div class="convo-info">
             <div class="convo-name">{{ convo.name }}</div>
             @if (convo.lastMessage) {
@@ -50,7 +67,11 @@
   <div class="chat-area">
     @if (selectedConvo) {
       <div class="chat-header">
-        <span class="avatar sm">{{ selectedConvo.name.charAt(0) }}</span>
+        @if (convoAvatar(selectedConvo)) {
+          <img class="avatar sm img" [src]="convoAvatar(selectedConvo)!" alt="" />
+        } @else {
+          <span class="avatar sm">{{ selectedConvo.name.charAt(0) }}</span>
+        }
         <div class="header-info">
           <div class="chat-name">{{ selectedConvo.name }}</div>
           @if (typingUser) {

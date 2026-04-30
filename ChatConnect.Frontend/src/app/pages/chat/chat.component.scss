@@ -17,6 +17,12 @@
 .avatar { width: 40px; height: 40px; border-radius: 50%; background: #7c3aed; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
 .avatar.group { background: #059669; }
 .avatar.sm { width: 36px; height: 36px; font-size: 14px; }
+.avatar.img { object-fit: cover; background: #1a1a2e; }
+.my-avatar { position: relative; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; flex-shrink: 0; overflow: hidden; background: #7c3aed; display: flex; align-items: center; justify-content: center; }
+.my-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.my-avatar .avatar-letter { color: #fff; font-weight: 700; font-size: 14px; }
+.my-avatar .my-avatar-edit { position: absolute; bottom: 0; right: 0; left: 0; background: rgba(0,0,0,0.55); color: #fff; font-size: 10px; text-align: center; line-height: 12px; padding: 1px 0; opacity: 0; transition: opacity 0.15s; }
+.my-avatar:hover .my-avatar-edit { opacity: 1; }
 .convo-info { flex: 1; min-width: 0; }
 .convo-name { font-size: 14px; font-weight: 600; }
 .convo-last { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }

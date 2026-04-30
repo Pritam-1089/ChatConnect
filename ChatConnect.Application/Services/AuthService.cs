@@ -22,14 +22,14 @@ public class AuthService : IAuthService
             throw new InvalidOperationException("Email already registered.");
         var user = new User { FullName = dto.FullName, Email = dto.Email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password) };
         await _userRepo.AddAsync(user);
-        return new AuthResponseDto(GenerateToken(user), user.Id, user.FullName, user.Email);
+        return new AuthResponseDto(GenerateToken(user), user.Id, user.FullName, user.Email, user.AvatarUrl);
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
     {
         var user = await _userRepo.GetByEmailAsync(dto.Email) ?? throw new UnauthorizedAccessException("Invalid credentials.");
         if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) throw new UnauthorizedAccessException("Invalid credentials.");
-        return new AuthResponseDto(GenerateToken(user), user.Id, user.FullName, user.Email);
+        return new AuthResponseDto(GenerateToken(user), user.Id, user.FullName, user.Email, user.AvatarUrl);
     }
 
     private string GenerateToken(User user)

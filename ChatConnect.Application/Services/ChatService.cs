@@ -24,7 +24,7 @@ public class ChatService : IChatService
             result.Add(new ConversationDto(c.Id,
                 c.IsGroup ? c.Name! : c.Members.First(m => m.UserId != userId).User.FullName,
                 c.IsGroup, c.Members.Select(m => MapUser(m.User)).ToList(),
-                lastMsg != null ? new MessageDto(lastMsg.Id, lastMsg.Content, lastMsg.SenderId, lastMsg.Sender.FullName, lastMsg.IsRead, lastMsg.SentAt) : null,
+                lastMsg != null ? new MessageDto(lastMsg.Id, lastMsg.Content, lastMsg.SenderId, lastMsg.Sender.FullName, lastMsg.Sender.AvatarUrl, lastMsg.IsRead, lastMsg.SentAt) : null,
                 unread));
         }
         return result;
@@ -65,7 +65,7 @@ public class ChatService : IChatService
     public async Task<IEnumerable<MessageDto>> GetMessagesAsync(int conversationId, int userId, int skip = 0)
     {
         var messages = await _msgRepo.GetConversationMessagesAsync(conversationId, skip);
-        return messages.Select(m => new MessageDto(m.Id, m.Content, m.SenderId, m.Sender.FullName, m.IsRead, m.SentAt));
+        return messages.Select(m => new MessageDto(m.Id, m.Content, m.SenderId, m.Sender.FullName, m.Sender.AvatarUrl, m.IsRead, m.SentAt));
     }
 
     public async Task<MessageDto> SendMessageAsync(int conversationId, SendMessageDto dto, int userId)
@@ -73,7 +73,15 @@ public class ChatService : IChatService
         var user = await _userRepo.GetByIdAsync(userId);
         var message = new Message { Content = dto.Content, ConversationId = conversationId, SenderId = userId };
         await _msgRepo.AddAsync(message);
-        return new MessageDto(message.Id, message.Content, userId, user!.FullName, false, message.SentAt);
+        return new MessageDto(message.Id, message.Content, userId, user!.FullName, user.AvatarUrl, false, message.SentAt);
+    }
+
+    public async Task<string?> UpdateAvatarAsync(int userId, string avatarUrl)
+    {
+        var user = await _userRepo.GetByIdAsync(userId) ?? throw new KeyNotFoundException("User not found.");
+        user.AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? null : avatarUrl;
+        await _userRepo.UpdateAsync(user);
+        return user.AvatarUrl;
     }
 
     public async Task MarkAsReadAsync(int conversationId, int userId) => await _msgRepo.MarkAsReadAsync(conversationId, userId);

@@ -13,4 +13,5 @@ public interface IChatService
     Task<IEnumerable<UserDto>> GetOnlineUsersAsync();
     Task SetUserOnlineAsync(int userId, bool isOnline);
     Task UnsendMessageAsync(int messageId, int userId);
+    Task<string?> UpdateAvatarAsync(int userId, string avatarUrl);
 }
